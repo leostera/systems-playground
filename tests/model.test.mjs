@@ -1,16 +1,39 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { simulate, DEFAULT_PARAMETERS } from "../src/model.ts";
+import { simulate } from "../src/model.ts";
 
-test("simulation includes the initial state and reaches the configured horizon", () => {
-  const points = simulate(DEFAULT_PARAMETERS);
-  assert.equal(points[0].year, 0);
-  assert.equal(points[0].population, DEFAULT_PARAMETERS.population);
-  assert.equal(points.at(-1).year, DEFAULT_PARAMETERS.years);
+test("external inflows and outflows change arbitrary stocks over time", () => {
+  const points = simulate(
+    [{ id: "water", initial: 60 }],
+    [
+      { id: "rain", rate: 8, targetStockId: "water" },
+      { id: "drain", rate: 6, sourceStockId: "water" },
+    ],
+    [],
+    10,
+    1,
+  );
+  assert.equal(points[0].stocks.water, 60);
+  assert.equal(points.at(-1).stocks.water, 80);
 });
 
-test("stocks stay within their physical bounds", () => {
-  const points = simulate({ ...DEFAULT_PARAMETERS, consumptionPerPerson: 100, birthRate: 0.2 });
-  assert.ok(points.every(({ population, resource }) => population >= 0 && resource >= 0));
-  assert.ok(points.every(({ resource }) => resource <= DEFAULT_PARAMETERS.capacity));
+test("stocks never fall below zero when outflows exceed their level", () => {
+  const points = simulate([{ id: "ore", initial: 5 }], [{ id: "mining", rate: 20, sourceStockId: "ore" }], [], 2, 1);
+  assert.ok(points.every(({ stocks }) => stocks.ore >= 0));
+  assert.equal(points.at(-1).stocks.ore, 0);
+});
+
+test("signed information links adjust the rate of a flow", () => {
+  const stocks = [{ id: "water", initial: 100 }];
+  const flows = [{ id: "drain", rate: 10, sourceStockId: "water" }];
+  const positive = simulate(stocks, flows, [{ sourceStockId: "water", targetFlowId: "drain", polarity: 1 }], 2, 1);
+  const negative = simulate(stocks, flows, [{ sourceStockId: "water", targetFlowId: "drain", polarity: -1 }], 2, 1);
+  assert.equal(positive.at(-1).stocks.water, 81);
+  assert.ok(negative.at(-1).stocks.water < positive.at(-1).stocks.water);
+});
+
+test("a fractional time horizon ends at the requested year", () => {
+  const points = simulate([{ id: "stock", initial: 0 }], [{ id: "inflow", rate: 1, targetStockId: "stock" }], [], 1.1, 0.5);
+  assert.equal(points.at(-1).year, 1.1);
+  assert.equal(points.at(-1).stocks.stock, 1.1);
 });

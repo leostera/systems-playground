@@ -1,15 +1,17 @@
 # Systems Playground
 
-An interactive systems-dynamics playground inspired by Donella Meadows’ *Thinking in Systems*. Start with a renewable commons: people draw from a shared resource, the resource regenerates, and resource scarcity feeds back into population growth.
+A flexible stock-and-flow canvas inspired by Donella Meadows’ *Thinking in Systems*. Stocks are accumulations; flows change them; source and sink clouds mark what sits beyond the model boundary; thin signed arrows show information links.
 
-## Explore
+## On the canvas
 
-- Drag stocks around the causal-loop diagram and follow the signed feedback links.
-- Change regeneration, per-person use, population growth, and the simulation horizon.
-- Watch the stocks change over time, then scrub or play through the simulation.
-- Everything runs in the browser; no account or data collection is involved.
+- Add and arrange any number of stocks, source clouds, sink clouds, and flow valves.
+- Connect pipes through a valve to show material moving into or out of stocks.
+- Draw signed influence arrows from stocks to flow rates.
+- Edit initial quantities, flow rates, names, and link polarity in the inspector.
+- Scrub or play the generic stock-flow simulation. Your diagram is saved in this browser only.
+- Load the bathtub starter model or clear the canvas and start from scratch.
 
-The simulation engine is a standalone TypeScript model. React Flow presents the system structure; it does not own the model logic.
+The simulation engine is standalone TypeScript; React Flow handles the editable diagram. Fixed flow rates are adjusted by connected information links: positive links vary directly with their source stock, negative links inversely. The model is intentionally small and transparent, not a prediction engine.
 
 ## Develop
 
@@ -24,7 +26,7 @@ bun run dev
 
 ## Build and deploy
 
-This project uses the Cloudflare Vite plugin and Cloudflare’s `cf` CLI. The Worker is `systems-playground`; the intended public hostname is `https://systems-playground.leostera.dev`.
+This project uses the Cloudflare Vite plugin and Cloudflare’s `cf` CLI. The Worker is `systems-playground` and serves `https://systems-playground.leostera.dev`.
 
 ```sh
 cf build
