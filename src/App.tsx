@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   addEdge,
   Background,
@@ -336,6 +336,11 @@ export function App() {
     : node), [nodes, point]);
   const selectedNode = nodes.find((node) => node.id === selection.nodeId);
   const selectedEdge = edges.find((edge) => edge.id === selection.edgeId);
+  const handleSelectionChange = useCallback(({ nodes: selectedNodes, edges: selectedEdges }: { nodes: CanvasNode[]; edges: CanvasEdge[] }) => {
+    const nodeId = selectedNodes[0]?.id;
+    const edgeId = selectedEdges[0]?.id;
+    setSelection((current) => current.nodeId === nodeId && current.edgeId === edgeId ? current : { nodeId, edgeId });
+  }, []);
 
   useEffect(() => {
     try {
@@ -478,7 +483,7 @@ export function App() {
               onNodesChange={onNodesChangeTyped}
               onEdgesChange={onEdgesChangeTyped}
               onConnect={connect}
-              onSelectionChange={({ nodes: selectedNodes, edges: selectedEdges }) => setSelection({ nodeId: selectedNodes[0]?.id, edgeId: selectedEdges[0]?.id })}
+              onSelectionChange={handleSelectionChange}
               nodesConnectable={flowToolActive}
               nodesDraggable
               elementsSelectable
