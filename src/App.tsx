@@ -6,7 +6,6 @@ import {
   Controls,
   Handle,
   MarkerType,
-  MiniMap,
   Position,
   ReactFlow,
   useEdgesState,
@@ -51,11 +50,11 @@ const starterGraph: Graph = {
     { id: "sink", type: "cloud", position: { x: 1010, y: 205 }, data: { kind: "sink", label: "Beyond the boundary" } },
   ],
   edges: [
-    { id: "rain-inflow", source: "rain", sourceHandle: "pipe-out", target: "inflow", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#789086" }, style: { stroke: "#789086", strokeWidth: 2 } },
-    { id: "inflow-water", source: "inflow", sourceHandle: "pipe-out", target: "water", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#789086" }, style: { stroke: "#789086", strokeWidth: 2 } },
-    { id: "water-drain", source: "water", sourceHandle: "pipe-out", target: "drain", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#789086" }, style: { stroke: "#789086", strokeWidth: 2 } },
-    { id: "drain-sink", source: "drain", sourceHandle: "pipe-out", target: "sink", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#789086" }, style: { stroke: "#789086", strokeWidth: 2 } },
-    { id: "water-regulates-outflow", source: "water", sourceHandle: "info-out", target: "drain", targetHandle: "info-in", type: "smoothstep", data: { kind: "influence", polarity: 1 }, label: "+", markerEnd: { type: MarkerType.ArrowClosed, color: "#9a866b" }, style: { stroke: "#9a866b", strokeWidth: 1.5, strokeDasharray: "5 4" }, labelStyle: { fill: "#7d6d55", fontWeight: 700, fontSize: 12 }, labelBgStyle: { fill: "#fbfaf5", fillOpacity: 0.95 } },
+    { id: "rain-inflow", source: "rain", sourceHandle: "pipe-out", target: "inflow", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#42433e" }, style: { stroke: "#42433e", strokeWidth: 1.5 } },
+    { id: "inflow-water", source: "inflow", sourceHandle: "pipe-out", target: "water", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#42433e" }, style: { stroke: "#42433e", strokeWidth: 1.5 } },
+    { id: "water-drain", source: "water", sourceHandle: "pipe-out", target: "drain", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#42433e" }, style: { stroke: "#42433e", strokeWidth: 1.5 } },
+    { id: "drain-sink", source: "drain", sourceHandle: "pipe-out", target: "sink", targetHandle: "pipe-in", type: "smoothstep", data: { kind: "pipe" }, markerEnd: { type: MarkerType.ArrowClosed, color: "#42433e" }, style: { stroke: "#42433e", strokeWidth: 1.5 } },
+    { id: "water-regulates-outflow", source: "water", sourceHandle: "info-out", target: "drain", targetHandle: "info-in", type: "default", data: { kind: "influence", polarity: 1 }, label: "+", markerEnd: { type: MarkerType.ArrowClosed, color: "#718da0" }, style: { stroke: "#718da0", strokeWidth: 1.2, strokeDasharray: "4 4" }, labelStyle: { fill: "#617d90", fontWeight: 600, fontSize: 11 }, labelBgStyle: { fill: "#fff", fillOpacity: 0.95 } },
   ],
 };
 
@@ -141,9 +140,8 @@ function CloudNode({ data, selected }: NodeProps<CanvasNode>) {
       {isSource
         ? <Handle id="pipe-out" type="source" position={Position.Right} />
         : <Handle id="pipe-in" type="target" position={Position.Left} />}
-      <span className="cloud-glyph" aria-hidden="true">{isSource ? "↗" : "↘"}</span>
-      <span className="cloud-label">{data.label}</span>
-      <span className="cloud-caption">{isSource ? "source cloud" : "sink cloud"}</span>
+      <svg className="cloud-outline" viewBox="0 0 148 72" aria-hidden="true"><path d="M26 54C12 54 8 45 11 37c2-7 9-10 16-9 1-13 12-19 22-16 8-10 25-9 30 2 12-5 25 1 26 12 12-1 20 7 19 16-1 8-8 12-18 12H26Z"/></svg>
+      <span className="cloud-content"><span className="cloud-label">{data.label}</span><span className="cloud-caption">{isSource ? "source" : "sink"}</span></span>
     </div>
   );
 }
@@ -207,22 +205,19 @@ function CanvasToolbar({ mode, setMode, addNode }: {
   return (
     <aside className="tool-rail">
       <div className="tool-group">
-        <div className="rail-label">EDIT</div>
-        <button className={`tool-button${mode === "select" ? " active" : ""}`} onClick={() => setMode("select")} title="Select and move elements"><span className="tool-icon">↖</span><span>Select</span></button>
+        <button className={`tool-button${mode === "select" ? " active" : ""}`} onClick={() => setMode("select")} title="Select and move elements"><span className="tool-icon">↖</span><span>Select</span><span className="tool-hint">V</span></button>
       </div>
       <div className="tool-group">
-        <div className="rail-label">ADD TO CANVAS</div>
-        <button className="tool-button" onClick={() => addNode("stock")}><span className="tool-icon stock-icon">□</span><span>Stock</span><span className="tool-hint">S</span></button>
-        <button className="tool-button" onClick={() => addNode("source")}><span className="tool-icon cloud-icon">↗</span><span>Source cloud</span></button>
-        <button className="tool-button" onClick={() => addNode("sink")}><span className="tool-icon cloud-icon">↘</span><span>Sink cloud</span></button>
-        <button className="tool-button" onClick={() => addNode("flow")}><span className="tool-icon flow-icon">◈</span><span>Flow / valve</span><span className="tool-hint">F</span></button>
+        <button className="tool-button" onClick={() => addNode("stock")} title="Add stock"><span className="tool-icon stock-icon">□</span><span>Stock</span><span className="tool-hint">S</span></button>
+        <button className="tool-button" onClick={() => addNode("source")} title="Add source cloud"><span className="tool-icon cloud-icon">☁</span><span>Source cloud</span></button>
+        <button className="tool-button" onClick={() => addNode("sink")} title="Add sink cloud"><span className="tool-icon cloud-icon">☁</span><span>Sink cloud</span></button>
+        <button className="tool-button" onClick={() => addNode("flow")} title="Add flow valve"><span className="tool-icon flow-icon">◈</span><span>Flow / valve</span><span className="tool-hint">F</span></button>
       </div>
       <div className="tool-group">
-        <div className="rail-label">CONNECT</div>
-        <button className={`tool-button${mode === "pipe" ? " active" : ""}`} onClick={() => setMode(mode === "pipe" ? "select" : "pipe")}><span className="tool-icon pipe-icon">⟶</span><span>Material flow</span></button>
-        <button className={`tool-button${mode === "influence" ? " active" : ""}`} onClick={() => setMode(mode === "influence" ? "select" : "influence")}><span className="tool-icon info-icon">⇢</span><span>Influence arrow</span></button>
+        <button className={`tool-button${mode === "pipe" ? " active" : ""}`} onClick={() => setMode(mode === "pipe" ? "select" : "pipe")} title="Draw material flow"><span className="tool-icon pipe-icon">⟶</span><span>Material flow</span></button>
+        <button className={`tool-button${mode === "influence" ? " active" : ""}`} onClick={() => setMode(mode === "influence" ? "select" : "influence")} title="Draw information link"><span className="tool-icon info-icon">⇢</span><span>Influence arrow</span></button>
       </div>
-      <div className="tool-help"><strong>{mode === "pipe" ? "Draw a pipe" : mode === "influence" ? "Draw an influence" : "Build a system"}</strong><span>{mode === "pipe" ? "Connect a stock or source to a flow valve, then the valve to a stock or sink." : mode === "influence" ? "Connect a stock to a flow to show what changes its rate." : "Add elements, then connect them. Drag to arrange the system."}</span></div>
+      <div className="tool-help">{mode === "pipe" ? "Connect through a valve" : mode === "influence" ? "Stock → flow rate" : "Drag to arrange"}</div>
     </aside>
   );
 }
@@ -419,8 +414,8 @@ export function App() {
         targetHandle: connection.targetHandle,
         type: "smoothstep",
         data: { kind: "pipe" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#789086" },
-        style: { stroke: "#789086", strokeWidth: 2 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#42433e" },
+        style: { stroke: "#42433e", strokeWidth: 1.5 },
       };
     } else if (mode === "influence" && source.type === "stock" && (target.type === "flow" || target.type === "stock")) {
       edge = {
@@ -429,13 +424,13 @@ export function App() {
         sourceHandle: connection.sourceHandle,
         target: connection.target,
         targetHandle: connection.targetHandle,
-        type: "smoothstep",
+        type: "default",
         data: { kind: "influence", polarity: 1 },
         label: "+",
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#9a866b" },
-        style: { stroke: "#9a866b", strokeWidth: 1.5, strokeDasharray: "5 4" },
-        labelStyle: { fill: "#7d6d55", fontWeight: 700, fontSize: 12 },
-        labelBgStyle: { fill: "#fbfaf5", fillOpacity: 0.95 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#718da0" },
+        style: { stroke: "#718da0", strokeWidth: 1.2, strokeDasharray: "4 4" },
+        labelStyle: { fill: "#617d90", fontWeight: 600, fontSize: 11 },
+        labelBgStyle: { fill: "#fff", fillOpacity: 0.95 },
       };
     }
     if (edge) {
@@ -474,7 +469,7 @@ export function App() {
       <main className="playground">
         <CanvasToolbar mode={mode} setMode={setMode} addNode={addNode} />
         <section className="center-stage">
-          <div className="canvas-heading"><div><div className="canvas-title">A system is more than its parts</div><div className="canvas-subtitle">Stocks accumulate · flows change them · arrows carry information</div></div><span className={`mode-badge${flowToolActive ? " mode-active" : ""}`}>{mode === "select" ? "SELECT & MOVE" : mode === "pipe" ? "DRAW MATERIAL FLOW" : "DRAW INFLUENCE LINK"}</span></div>
+          <div className="canvas-heading"><div><div className="canvas-title">Untitled system</div><div className="canvas-subtitle">Stocks accumulate · flows change them · arrows carry information</div></div><span className={`mode-badge${flowToolActive ? " mode-active" : ""}`}>{mode === "select" ? "SELECT & MOVE" : mode === "pipe" ? "DRAW MATERIAL FLOW" : "DRAW INFLUENCE LINK"}</span></div>
           <div className={`canvas-frame${flowToolActive ? " connecting" : ""}`}>
             <ReactFlow<CanvasNode, CanvasEdge>
               nodes={displayNodes}
@@ -493,12 +488,11 @@ export function App() {
               maxZoom={1.4}
               deleteKeyCode={["Backspace", "Delete"]}
               defaultEdgeOptions={{ type: "smoothstep" }}
-              connectionLineStyle={{ stroke: mode === "influence" ? "#9a866b" : "#789086", strokeWidth: 2, strokeDasharray: mode === "influence" ? "5 4" : undefined }}
+              connectionLineStyle={{ stroke: mode === "influence" ? "#718da0" : "#42433e", strokeWidth: 1.5, strokeDasharray: mode === "influence" ? "4 4" : undefined }}
               proOptions={{ hideAttribution: false }}
             >
               <Background variant={BackgroundVariant.Dots} color="#d7dbd1" gap={20} size={1} />
-              <Controls showInteractive={false} />
-              <MiniMap nodeColor={(node) => node.type === "stock" ? "#39745d" : node.type === "flow" ? "#d9e4dd" : "#e7e5d8"} maskColor="#f5f5efb5" />
+              <Controls position="bottom-right" showInteractive={false} />
             </ReactFlow>
             {nodes.length === 0 && <div className="canvas-empty"><span>Start with an accumulation</span><button onClick={() => addNode("stock")}>＋ Add a stock</button><small>Then connect a flow valve and mark what lies beyond the boundary.</small></div>}
           </div>
@@ -513,23 +507,11 @@ export function App() {
           </section>
           <footer className="canvas-footer">Inspired by Donella Meadows’ <em>Thinking in Systems</em> · Model boundaries are choices, not facts.</footer>
         </section>
-        <aside className="inspector">
-          <div className="inspector-header"><div><div className="rail-label">MODEL ELEMENT</div><h2>{selectedNode?.data.label ?? (selectedEdge ? (selectedEdge.data?.kind === "influence" ? "Influence arrow" : "Material pipe") : "Inspector")}</h2></div><span className="inspector-dots">···</span></div>
-          <Inspector
-            node={selectedNode}
-            edge={selectedEdge}
-            updateNode={updateNode}
-            updateEdge={updateEdge}
-            deleteSelection={deleteSelection}
-          />
-          <div className="current-levels">
-            <div className="rail-label">AT YEAR {year}</div>
-            {stocks.length === 0
-              ? <div className="no-stocks">No stocks in this canvas yet.</div>
-              : stocks.map((stock, index) => <div className="level-row" key={stock.id}><span><i style={{ background: STOCK_COLORS[index % STOCK_COLORS.length] }}/>{stock.data.label}</span><b>{Math.round(point.stocks[stock.id] ?? 0).toLocaleString("en-US")}</b></div>)}
-          </div>
-          <div className="model-note"><span>ⓘ</span><p>Fixed flow rates move material between stocks. A signed information arrow from a stock to a flow scales that flow from its starting level.</p></div>
-        </aside>
+        {(selectedNode || selectedEdge) && <aside className="inspector">
+          <div className="inspector-header"><div><div className="rail-label">MODEL ELEMENT</div><h2>{selectedNode?.data.label ?? (selectedEdge?.data?.kind === "influence" ? "Influence arrow" : "Material pipe")}</h2></div><button className="inspector-close" onClick={() => setSelection({})} aria-label="Close inspector">×</button></div>
+          <Inspector node={selectedNode} edge={selectedEdge} updateNode={updateNode} updateEdge={updateEdge} deleteSelection={deleteSelection} />
+          {selectedNode?.type === "stock" && <div className="current-levels"><div className="rail-label">AT YEAR {year}</div><div className="level-row"><span><i style={{ background: STOCK_COLORS[0] }}/>{selectedNode.data.label}</span><b>{Math.round(point.stocks[selectedNode.id] ?? 0).toLocaleString("en-US")}</b></div></div>}
+        </aside>}
       </main>
     </div>
   );
